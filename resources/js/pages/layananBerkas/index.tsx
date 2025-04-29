@@ -1,16 +1,13 @@
 import { Button } from '@/components/ui/button';
-import {
-    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { can } from '@/utils/permission';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Edit, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import {
-    Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger,
-} from '@/components/ui/dialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -67,15 +64,26 @@ export default function LayananBerkasIndex({ layananBerkas, flash }: Props) {
         if (flash.error) toast.error(flash.error);
     }, [flash]);
 
+    const page = usePage().props as {
+        auth?: {
+            permissions: string[];
+            roles?: string[];
+        };
+    };
+
+    const auth = page.auth ?? { permissions: [] };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Layanan Berkas" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-xl font-semibold">Layanan Berkas</h1>
-                    <Link href="/layanan_berkas/create">
-                        <Button className="bg-primary">Create Layanan Berkas</Button>
-                    </Link>
+                    {can('create-layananBerkas', auth) && (
+                        <Link href="/layanan_berkas/create">
+                            <Button className="bg-primary">Create Layanan Berkas</Button>
+                        </Link>
+                    )}
                 </div>
 
                 <Table className="mt-4">
@@ -98,7 +106,9 @@ export default function LayananBerkasIndex({ layananBerkas, flash }: Props) {
                             layananBerkas.map((item) => (
                                 <TableRow key={item.id}>
                                     <TableCell>{item.layanan?.nama_layanan}</TableCell>
-                                    <TableCell>{item.jenis_berkas?.kode} - {item.jenis_berkas?.nama_berkas}</TableCell>
+                                    <TableCell>
+                                        {item.jenis_berkas?.kode} - {item.jenis_berkas?.nama_berkas}
+                                    </TableCell>
                                     <TableCell>
                                         <a
                                             href={`/storage/${item.template}`}
@@ -110,18 +120,19 @@ export default function LayananBerkasIndex({ layananBerkas, flash }: Props) {
                                         </a>
                                     </TableCell>
                                     <TableCell className="flex gap-2">
-                                        <Link href={`/layanan_berkas/${item.id}/edit`}>
-                                            <Button variant="outline" size="sm">
-                                                <Edit className="h-4 w-4" />
+                                        {can('edit-layananBerkas', auth) && (
+                                            <Link href={`/layanan_berkas/${item.id}/edit`}>
+                                                <Button variant="outline" size="sm">
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                            </Link>
+                                        )}
+
+                                        {can('delete-layananBerkas', auth) && (
+                                            <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)}>
+                                                <Trash className="h-4 w-4" />
                                             </Button>
-                                        </Link>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleDelete(item.id)}
-                                        >
-                                            <Trash className="h-4 w-4" />
-                                        </Button>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))

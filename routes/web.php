@@ -29,6 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     route::resource('pengajuan', PengajuanController::class);
     route::get('pengajuan/{id}/berkas', [PengajuanController::class, 'berkas']);
     Route::post('/pengajuan/{pengajuan}/berkas/{jenisBerkas}', [PengajuanController::class, 'uploadBerkas'])->name('pengajuan.berkas.upload');
+    Route::post('/pengajuan/{pengajuan}/berkas/{jenisBerkas}/validate', [PengajuanController::class, 'validateBerkas']);
 
 });
 

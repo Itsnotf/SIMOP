@@ -1,11 +1,12 @@
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Trash, Edit } from 'lucide-react';
+import { can } from '@/utils/permission';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Edit, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -14,7 +15,6 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/user',
     },
 ];
-
 
 interface Role {
     id: number;
@@ -67,15 +67,26 @@ export default function UserIndex({ users, flash }: Props) {
         }
     }, [flash]);
 
+    const page = usePage().props as {
+        auth?: {
+            permissions: string[];
+            roles?: string[];
+        };
+    };
+
+    const auth = page.auth ?? { permissions: [] };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Users" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                     <h1 className="text-xl font-semibold">Users</h1>
-                    <Link href="/user/create">
-                        <Button className="bg-primary">Create User</Button>
-                    </Link>
+                    {can('create-user', auth) && (
+                        <Link href="/user/create">
+                            <Button className="bg-primary">Create User</Button>
+                        </Link>
+                    )}
                 </div>
 
                 <Table className="mt-4">
@@ -101,19 +112,18 @@ export default function UserIndex({ users, flash }: Props) {
                                     <TableCell className="w-[30%]">{user.email}</TableCell>
                                     <TableCell className="w-[20%]">{user.roles[0]?.name}</TableCell>
                                     <TableCell className="flex space-x-2">
-                                        <Link href={`/user/${user.id}/edit`}>
-                                            <Button variant="outline" size="sm">
-                                                <Edit className="w-4 h-4" />
+                                        {can('edit-user', auth) && (
+                                            <Link href={`/user/${user.id}/edit`}>
+                                                <Button variant="outline" size="sm">
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                            </Link>
+                                        )}
+                                        {can('delete-user', auth) && (
+                                            <Button variant="outline" size="sm" color="destructive" onClick={() => handleDelete(user.id)}>
+                                                <Trash className="h-4 w-4" />
                                             </Button>
-                                        </Link>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            color="destructive"
-                                            onClick={() => handleDelete(user.id)}
-                                        >
-                                            <Trash className="w-4 h-4" />
-                                        </Button>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))

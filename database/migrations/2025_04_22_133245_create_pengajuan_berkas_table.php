@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('pengajuan_id')->constrained('pengajuans')->onDelete('cascade');
             $table->foreignId('jenis_berkas_id')->constrained('jenis_berkas')->onDelete('cascade');
             $table->string('file')->nullable();
+            $table->string('keterangan')->nullable();
             $table->string('status')->default('pending');
             $table->timestamps();
         });

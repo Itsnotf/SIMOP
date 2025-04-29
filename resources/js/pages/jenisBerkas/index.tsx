@@ -2,12 +2,13 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Edit, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog';
+import { can } from '@/utils/permission';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -61,15 +62,26 @@ export default function LayananIndex({ flash, JenisBerkas }: Props) {
         }
     }, [flash]);
 
+    const page = usePage().props as {
+        auth?: {
+            permissions: string[];
+            roles?: string[];
+        };
+    };
+
+    const auth = page.auth ?? { permissions: [] };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Jenis Berkas" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-xl font-semibold">Jenis Berkas</h1>
-                    <Link href="/jenis_berkas/create">
-                        <Button className="bg-primary">Create Jenis Berkas</Button>
-                    </Link>
+                    {can('create-jenisBerkas', auth) && (
+                        <Link href="/jenis_berkas/create">
+                            <Button className="bg-primary">Create Jenis Berkas</Button>
+                        </Link>
+                    )}
                 </div>
 
                 <Table className="mt-4">
@@ -93,19 +105,19 @@ export default function LayananIndex({ flash, JenisBerkas }: Props) {
                                     <TableCell className="w-[30%]">{jenis_berkas.nama_berkas}</TableCell>
                                     <TableCell className="w-[50%]">{jenis_berkas.kode}</TableCell>
                                     <TableCell className="flex space-x-2">
-                                        <Link href={`/jenis_berkas/${jenis_berkas.id}/edit`}>
-                                            <Button variant="outline" size="sm">
-                                                <Edit className="h-4 w-4" />
+                                        {can('edit-jenisBerkas', auth) && (
+                                            <Link href={`/jenis_berkas/${jenis_berkas.id}/edit`}>
+                                                <Button variant="outline" size="sm">
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                            </Link>
+                                        )}
+
+                                        {can('delete-jenisBerkas', auth) && (
+                                            <Button variant="outline" size="sm" color="destructive" onClick={() => handleDelete(jenis_berkas.id)}>
+                                                <Trash className="h-4 w-4" />
                                             </Button>
-                                        </Link>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            color="destructive"
-                                            onClick={() => handleDelete(jenis_berkas.id)}
-                                        >
-                                            <Trash className="h-4 w-4" />
-                                        </Button>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))

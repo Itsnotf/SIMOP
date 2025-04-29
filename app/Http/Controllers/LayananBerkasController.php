@@ -6,6 +6,7 @@ use App\Models\JenisBerkas;
 use App\Models\Layanan;
 use App\Models\LayananBerkas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class LayananBerkasController extends Controller
@@ -31,7 +32,7 @@ class LayananBerkasController extends Controller
      */
     public function create()
     {
-        $jenisBerkas = JenisBerkas::all();
+        $jenisBerkas = JenisBerkas::whereDoesntHave('layananBerkas')->get();
         $layanans = Layanan::all();
         return Inertia::render('layananBerkas/create',[
             'jenisBerkas' => $jenisBerkas,
@@ -47,7 +48,7 @@ class LayananBerkasController extends Controller
         $validated = $request->validate([
             'layanan_id' => 'required|exists:layanans,id',
             'jenis_berkas_id' => 'required|exists:jenis_berkas,id',
-            'template' => 'required|file|mimes:pdf,doc,docx|max:2048',
+            'template' => 'nullable|file|mimes:pdf,doc,docx|max:5048',
         ]);
 
         $path = $request->file('template')->store('templates', 'public');
@@ -74,15 +75,42 @@ class LayananBerkasController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $layananBerkas = LayananBerkas::with('layanan', 'jenisBerkas')->findOrFail($id);
+        $jenisBerkas = JenisBerkas::whereDoesntHave('layananBerkas', function($query) use ($id) {
+            $query->where('id', '!=', $id);
+        })->get();
+        $layanans = Layanan::all();
+
+        return Inertia::render('layananBerkas/edit', [
+            'jenisBerkas' => $jenisBerkas,
+            'layanans' => $layanans,
+            'layananBerkas' => $layananBerkas
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'layanan_id' => 'required|exists:layanans,id',
+            'jenis_berkas_id' => 'required|exists:jenis_berkas,id',
+            'template' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+        ]);
+
+        $layananBerkas = LayananBerkas::findOrFail($id);
+
+        $data = [
+            'layanan_id' => $request->layanan_id,
+            'jenis_berkas_id' => $request->jenis_berkas_id,
+        ];
+
+        if ($request->hasFile('template')) {
+            Storage::delete($layananBerkas->template);
+            $data['template'] = $request->file('template')->store('templates', 'public');
+        }
+
+        $layananBerkas->update($data);
+
+        return redirect()->route('layanan_berkas.index')->with('success', 'Layanan Berkas berhasil diperbarui');
     }
 
     /**
@@ -90,6 +118,9 @@ class LayananBerkasController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        LayananBerkas::destroy($id);
+
+        return redirect()->route('layanan_berkas.index')->with('success', 'Layanan Berkas berhasil dihapus');
+
     }
 }

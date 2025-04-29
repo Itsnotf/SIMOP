@@ -1,11 +1,12 @@
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Trash, Edit } from 'lucide-react';
+import { can } from '@/utils/permission';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Edit, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -55,24 +56,34 @@ export default function Permissions({ permissions, flash }: Props) {
 
     useEffect(() => {
         if (flash.success) {
-            toast.success(flash.success); // Show success toast if available
+            toast.success(flash.success);
         }
 
         if (flash.error) {
-            toast.error(flash.error); // Show error toast if available
+            toast.error(flash.error);
         }
     }, [flash]);
 
+    const page = usePage().props as {
+        auth?: {
+            permissions: string[];
+            roles?: string[];
+        };
+    };
+
+    const auth = page.auth ?? { permissions: [] };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Permissions" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                     <h1 className="text-xl font-semibold">Permissions</h1>
-                    <Link href="/permission/create">
-                        <Button className="bg-primary">Create Permission</Button>
-                    </Link>
+                    {can('create-permission', auth) && (
+                        <Link href="/permission/create">
+                            <Button className="bg-primary">Create Permission</Button>
+                        </Link>
+                    )}
                 </div>
 
                 {/* Table of permissions */}
@@ -93,21 +104,20 @@ export default function Permissions({ permissions, flash }: Props) {
                         ) : (
                             permissions.map((permission) => (
                                 <TableRow key={permission.id}>
-                                    <TableCell className='w-[80%]'>{permission.name}</TableCell>
+                                    <TableCell className="w-[80%]">{permission.name}</TableCell>
                                     <TableCell className="flex space-x-2">
-                                        <Link href={`/permission/${permission.id}/edit`}>
-                                            <Button variant="outline" size="sm">
-                                                <Edit className="w-4 h-4" />
+                                        {can('edit-permission', auth) && (
+                                            <Link href={`/permission/${permission.id}/edit`}>
+                                                <Button variant="outline" size="sm">
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                            </Link>
+                                        )}
+                                        {can('delete-permission', auth) && (
+                                            <Button variant="outline" size="sm" color="destructive" onClick={() => handleDelete(permission.id)}>
+                                                <Trash className="h-4 w-4" />
                                             </Button>
-                                        </Link>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            color="destructive"
-                                            onClick={() => handleDelete(permission.id)}
-                                        >
-                                            <Trash className="w-4 h-4" />
-                                        </Button>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))
@@ -115,7 +125,6 @@ export default function Permissions({ permissions, flash }: Props) {
                     </TableBody>
                 </Table>
 
-                {/* Dialog for confirming delete */}
                 <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger />
                     <DialogContent>

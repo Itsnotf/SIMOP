@@ -125,14 +125,19 @@ class PengajuanController extends Controller
             'pengajuanBerkas' => $pengajuanBerkas,
             'pengajuan' => $pengajuan,
             'layananBerkas' => $layananBerkas,
+            'flash' => [
+                'success' => session('success'),
+                'error' => session('error'),
+            ]
         ]);
     }
 
     public function uploadBerkas(Request $request, string $pengajuanId, string $jenisBerkasId)
     {
         $request->validate([
-            'file' => 'required|file|mimes:pdf,jpg,jpeg,png,gif|max:2048',
+            'file' => 'required|file|mimes:pdf,jpg,jpeg,png,gif|max:5048',
         ]);
+
 
         $pengajuanBerkas = PengajuanBerkas::firstOrNew([
             'pengajuan_id' => $pengajuanId,
@@ -151,5 +156,25 @@ class PengajuanController extends Controller
 
         return redirect()->back()->with('success', 'Berkas berhasil diunggah.');
     }
+
+    public function validateBerkas(Request $request, $pengajuanId, $jenisBerkasId)
+    {
+        $request->validate([
+            'status' => 'required|in:approved,rejected',
+            'keterangan' => 'required_if:status,rejected|nullable|string'
+        ]);
+
+        $pengajuanBerkas = PengajuanBerkas::where('pengajuan_id', $pengajuanId)
+            ->where('jenis_berkas_id', $jenisBerkasId)
+            ->firstOrFail();
+
+        $pengajuanBerkas->update([
+            'status' => $request->status,
+            'keterangan' => $request->keterangan
+        ]);
+
+        return back()->with('success', 'Status berkas berhasil diperbarui');
+    }
+
 
 }
