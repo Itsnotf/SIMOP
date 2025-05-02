@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input'; // Add this import
 import { can } from '@/utils/permission';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -42,9 +43,11 @@ interface Props {
     };
 }
 
-export default function PengajuanIndex({ pengajuan, flash }: Props) {
+export default function PengajuanIndex({ pengajuan: initialPengajuan, flash }: Props) {
     const [open, setOpen] = useState(false);
     const [pengajuanToDelete, setPengajuanToDelete] = useState<number | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredPengajuan, setFilteredPengajuan] = useState<Pengajuan[]>(initialPengajuan);
 
     const { delete: destroy } = useForm();
 
@@ -69,6 +72,20 @@ export default function PengajuanIndex({ pengajuan, flash }: Props) {
         if (flash.error) toast.error(flash.error);
     }, [flash]);
 
+    // Search functionality
+    useEffect(() => {
+        const results = initialPengajuan.filter(item => {
+            return (
+                item.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.layanan.nama_layanan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.perusahaan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.nohp.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.status.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        });
+        setFilteredPengajuan(results);
+    }, [searchTerm, initialPengajuan]);
+
     const page = usePage().props as {
         auth?: {
             permissions: string[];
@@ -91,6 +108,16 @@ export default function PengajuanIndex({ pengajuan, flash }: Props) {
                     )}
                 </div>
 
+                {/* Search Input */}
+                <div className="w-full md:w-1/3">
+                    <Input
+                        type="text"
+                        placeholder="Cari pengajuan..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+
                 <Table className="mt-4">
                     <TableHeader>
                         <TableRow>
@@ -103,14 +130,14 @@ export default function PengajuanIndex({ pengajuan, flash }: Props) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {pengajuan.length === 0 ? (
+                        {filteredPengajuan.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center">
-                                    Tidak ada data pengajuan.
+                                    {searchTerm ? 'Tidak ada hasil pencarian' : 'Tidak ada data pengajuan.'}
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            pengajuan.map((item) => (
+                            filteredPengajuan.map((item) => (
                                 <TableRow key={item.id}>
                                     <TableCell>{item.user.name}</TableCell>
                                     <TableCell>{item.layanan.nama_layanan}</TableCell>
