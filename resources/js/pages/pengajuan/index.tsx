@@ -72,7 +72,6 @@ export default function PengajuanIndex({ pengajuan: initialPengajuan, flash }: P
         if (flash.error) toast.error(flash.error);
     }, [flash]);
 
-    // Search functionality
     useEffect(() => {
         const results = initialPengajuan.filter(item => {
             return (
@@ -108,7 +107,6 @@ export default function PengajuanIndex({ pengajuan: initialPengajuan, flash }: P
                     )}
                 </div>
 
-                {/* Search Input */}
                 <div className="w-full md:w-1/3">
                     <Input
                         type="text"

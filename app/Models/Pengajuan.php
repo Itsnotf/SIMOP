@@ -25,4 +25,12 @@ class Pengajuan extends Model
     {
         return $this->hasMany(PengajuanBerkas::class, 'pengajuan_id');
     }
+
+    public function allBerkasApproved(): bool
+    {
+        return $this->pengajuanBerkas->isNotEmpty() &&
+            $this->pengajuanBerkas->every('status', 'approved');
+    }
+
+
 }

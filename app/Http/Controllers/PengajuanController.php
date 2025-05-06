@@ -18,7 +18,8 @@ class PengajuanController extends Controller
      */
     public function index()
     {
-        $pengajuans = Pengajuan::with('user','layanan')->get();
+        $pengajuans = Pengajuan::with('user','layanan','pengajuanBerkas')->get();
+
         return Inertia::render('pengajuan/index', [
             'pengajuan' => $pengajuans,
             'flash' => [
@@ -175,6 +176,5 @@ class PengajuanController extends Controller
 
         return back()->with('success', 'Status berkas berhasil diperbarui');
     }
-
 
 }
