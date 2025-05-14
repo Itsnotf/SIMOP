@@ -8,6 +8,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\testerController;
 use App\Http\Controllers\UserController;
+use App\Models\PengajuanBerkas;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -17,7 +18,11 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
+    return Inertia::render('dashboard', [
+        'total' => PengajuanBerkas::count(),
+        'pending' => PengajuanBerkas::where('status', 'pending')->count(),
+        'approved' => PengajuanBerkas::where('status', 'approved')->count(),
+    ]);
     })->name('dashboard');
 
     route::resource('permission', PermissionController::class);

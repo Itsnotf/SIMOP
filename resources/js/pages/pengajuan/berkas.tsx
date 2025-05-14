@@ -146,7 +146,7 @@ export default function PengajuanBerkasPage({ pengajuan, layananBerkas, pengajua
                             <Button variant="outline" onClick={() => submitValidation('rejected')} disabled={isSubmitting}>
                                 Tolak
                             </Button>
-                            <Button onClick={() => submitValidation('approved')} disabled={isSubmitting}>
+                            <Button  onClick={() => submitValidation('approved')} disabled={isSubmitting}>
                                 Setujui
                             </Button>
                         </div>
