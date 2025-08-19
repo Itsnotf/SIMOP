@@ -96,7 +96,7 @@ export default function LayananIndex({ flash, JenisBerkas }: Props) {
                         {JenisBerkas.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={100} className="text-center">
-                                    Belum ada jenis berkas.
+                                    Tidak ada Jenis Berkas.
                                 </TableCell>
                             </TableRow>
                         ) : (

@@ -136,7 +136,7 @@ class PengajuanController extends Controller
     public function uploadBerkas(Request $request, string $pengajuanId, string $jenisBerkasId)
     {
         $request->validate([
-            'file' => 'required|file|mimes:pdf,jpg,jpeg,png,gif|max:5048',
+            'file' => 'required|file|mimes:pdf,jpg,jpeg,png,gif|max:50480',
         ]);
 
 

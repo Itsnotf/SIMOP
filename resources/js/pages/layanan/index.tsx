@@ -96,14 +96,15 @@ export default function LayananIndex({ flash, layanans }: Props) {
                         {layanans.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={100} className="text-center">
-                                    No layanans available.
+                                    Tidak ada Layanan.
                                 </TableCell>
                             </TableRow>
                         ) : (
                             layanans.map((layanan) => (
                                 <TableRow key={layanan.id}>
                                     <TableCell className="w-[30%]">{layanan.nama_layanan}</TableCell>
-                                    <TableCell className="w-[50%]">{layanan.deskripsi_layanan}</TableCell>
+                                    <TableCell className="w-[50%] whitespace-pre-wrap break-words">{layanan.deskripsi_layanan}</TableCell>
+
                                     <TableCell className="flex space-x-2">
                                         {can('edit-layanan', auth) && (
                                             <Link href={`/layanan/${layanan.id}/edit`}>

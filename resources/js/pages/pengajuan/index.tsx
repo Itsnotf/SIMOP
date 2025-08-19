@@ -131,7 +131,7 @@ export default function PengajuanIndex({ pengajuan: initialPengajuan, flash }: P
                         {filteredPengajuan.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center">
-                                    {searchTerm ? 'Tidak ada hasil pencarian' : 'Tidak ada data pengajuan.'}
+                                    {searchTerm ? 'Tidak ada hasil pencarian' : 'Tidak ada data Pengajuan.'}
                                 </TableCell>
                             </TableRow>
                         ) : (

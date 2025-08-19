@@ -48,7 +48,7 @@ class LayananBerkasController extends Controller
         $validated = $request->validate([
             'layanan_id' => 'required|exists:layanans,id',
             'jenis_berkas_id' => 'required|exists:jenis_berkas,id',
-            'template' => 'nullable|file|mimes:pdf,doc,docx|max:5048',
+            'template' => 'nullable|file|mimes:pdf,doc,docx|max:50480',
         ]);
 
         $path = $request->file('template')->store('templates', 'public');
